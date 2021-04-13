@@ -1,0 +1,65 @@
+
+In the simulation studies, we could calculate ELPL-MR and ELPL-MP because the DGM was known. In practice, when the DGM is not known, the predictive performance metrics can be estimated by hiding part of the data from the model so as to serve as out-of-sample data. This is known as cross-validation and it needs to be implemented based on which prediction task (and metric) is of interest [@bates2021cross]. For example, @bolt2003estimation implemented a cross-validation technique that corresponds to the missing person prediction task. @bergner2012model and @wu2020variational cross-validated item response models in a way that corresponds to the missing responses task. We now describe how to use cross-validation to estimate each predictive fit metrics in practice. We then provide a real data example of using cross-validation.
+
+## Cross-validated Log Likelihood for Missing Responses (CVLL-MR)
+
+We randomly partition the data into folds based on the item responses (i.e., the elements of $Y$). We stratify randomization by person so that each person is split into "sub-persons" and each sub-person gets randomly assigned to a fold [@ditrapani2019assessing]. As a result, each fold contains approximately the same number of item responses for each person. Mathematically, following notation similar to @vehtari2017practical, the data is partitioned into 8 folds $Y^{(k)}$ for $k = 1, \dots, 8$. Each model is fit separately to each training set $Y^{(-k)}$ using MMLE, which yields item parameter estimates $\bm{\psi_j^{(-k)}}$. Similarly, person abilities, $\bm{\hat\theta_i^{(-k)}}$, are estimated using EAP. The predictive (i.e. out-of-sample or cross-validated) likelihood of $Y^{(k)}$ is
+\begin{align}
+p(Y^{(k)} | Y^{(-k)}) = \prod_{i=1}^{I} \prod_{j=1}^{J}  \hat{\text{Pr}}(y_{ij}^{(k)} | \bm{\hat\psi_j}^{(-k)}, \bm{\hat\theta_i}^{(-k)}).
+\end{align}
+We then aggregate across folds to get the cross-validated log likelihood for missing responses (CVLL-MR):
+\begin{align}
+\text{CVLL-MR}(\text{model}(Y)) = \sum_{k = 1}^{K} \log p(Y^{(k)} | Y^{(-k)}).
+\end{align}
+
+## Cross-validated Log Likelihood for Missing Persons (CVLL-MP)
+
+We randomly partition the data into folds based on the persons (i.e., the rows of $Y$). Mathematically, the data is partitioned into 8 folds $Y^{(k)}$ for $k = 1, \dots, 8$. Each model is fit separately to each training set $Y^{(-k)}$ using MMLE, which yields item parameter estimates $\bm{\psi_j^{(-k)}}$. For each fold, we calculate predictive (i.e. out-of-sample or cross-validated) likelihood of $Y^{(k)}$ by integrating over $\hat g(\bm{\theta})$:
+\begin{align}
+p(Y^{(k)} | Y^{(-k)}) = \prod_{i \in i^{(k)}}^{I} \int \prod_{j=1}^{J} \hat{\text{Pr}}(y_{ij}^{(k)} | \psi_j^{(-k)}, \theta) \hat g(\bm{\theta})d\bm{\theta}.
+\end{align}
+We then aggregate across folds to get the cross-validated log likelihood for missing persons (CVLL-MP):
+\begin{align}
+\text{CVLL-MP}(\text{model}(Y)) = \sum_{k = 1}^{K} \log p(Y^{(k)} | Y^{(-k)}).
+\end{align}
+
+## Real Data Example
+
+The Programme for International Student Assessment (PISA) is conducted every three years and aims to measure "the extent to which 15-year-old students, near the end of the compulsory education, have acquired key knowledge and skills" [@pisa2015pisa] In 2015, PISA switched from using a Rasch model to a 2PL model based on research showing that the 2PL model had lower AIC and BIC [@oliveri2011investigation]. To demonstrate model selection in practice, we compared a variety of models fit to a subset of the 2015 PISA data. In particular, we focused on the first 17 questions^[These questions have high response rates presumably because students don't run out of time] from science booklet 25. We considered the 9800 students (regardless of country) who responded to all 17 questions. As a result, \(Y\) contained no missingness and \(9800 \cdot 17 = 166,600\) item responses. So that all items were dichotomously coded, we considered partial credit to be correct.
+
+We compared seven models fit to this data: Rasch, 1F 2PL, 1F 3PL, 2F 2PL, 2F 3PL, 3F 2PL, and 3F 3PL. We evaluated each of these models using CVLL-MR, CVLL-MP, BIC, AIC, and LRT. For the LRT, we compared each pair of models ordered by number of parameters. We also evaluated each model using cross-validated accuracy for missing responses (CVACC-MR), which is similar to CVLL-MR but accuracy (at a 0.5 cutoff) as opposed to log likelihood is aggregated across folds. As shown in Table \ref{tab:results1}, the selected model varied by metric. Consistent with results from our simulation studies, metrics based on the MR prediction task selected models with fewer parameters than metrics based on the MP prediction task. In particular, CVLL-MR and CVACC-MR both selected the 1F 3PL. The other four metrics, which are all based on marginalized likelihood, selected either the 2F 3PL or 3F 3PL models.
+
+This case study demonstrates that the selected model varies significantly by metric. The cross-validation metrics involve fewer assumptions, which might be good reason to prefer them to the other metrics. Even so, which cross-validation metric should be used? If the goal is to predict probabilities of item responses—for example, in developing a computer adaptive version of the PISA—then the 1F 3PL model as selected by CVLL-MR might be used. On the other hand, if the goal is draw conclusions with regard to the population of persons, then a model with more parameters such as the 3F 3PL model as selected by CVLL-MP may be preferred.
+
+```{r}
+##### GET VALUES FOR TABLE BELOW #####
+# cvpisa <- read_rds("pisa/cvpisa.rds")
+# 
+# cvpisa %>%
+# 	select(-full, -mr_cv, -mp_cv) %>% 
+# 	mutate(model = str_glue("{dim}F {items}")) %>%
+# 	select(model, npars, mr_lik, mr_acc, mp_lik, bic, aic, LRT = anova_p) %>%
+# 	mutate_if(is.numeric, round, 5) %>%
+# 	mutate_at(vars(bic, aic, mr_lik, mp_lik), round, 0) %>%
+# 	mutate_all(as.character)
+```
+
+\centering
+\fontsize{6}{8}\selectfont
+\begin{small}
+\begin{tabular}[t]{llllllll}
+\toprule
+Model & Parameters & CVLL-MR & CVACC-MR & CVLL-MP & BIC & AIC & LRT\\
+\midrule
+1F Rasch & 18 & -86130 & 0.74454   & -89816 & 179759  & 179630 & NA\\
+1F 2PL & 34 & -84921 & 0.74708     & -88844 & 177923  & 177679 & <10\textasciicircum{}-10\\
+2F 2PL & 50 & -85869 & 0.74757     & -88758 & 177859  & 177499 & <10\textasciicircum{}-10\\
+1F 3PL & 51 & *-84828* & *0.74782* & -88756 & 177880  & 177513 & <10\textasciicircum{}-10\\
+3F 2PL & 65 & -86019 & 0.74764     & -88741 & 177915  & 177448 & <10\textasciicircum{}-10\\
+2F 3PL & 67 & -85930 & 0.74734     & -88682 & *177837*  & 177355 & <10\textasciicircum{}-10\\
+3F 3PL & 82 & -86049 & 0.74736     & *-88653* & 177888  & *177298* & *<10\textasciicircum{}-10*\\
+\bottomrule
+\end{tabular}
+\label{tab:inpractice}
+\end{small}
+\end{table}

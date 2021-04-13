@@ -1,0 +1,91 @@
+
+To demonstrate the behavior and utility of the two predictive fit metrics, ELPL-MR and ELPL-MP, we conducted four simulation studies. The first revisited @kang2007irt using predictive fit. The second and third both used a 3PL DGM and explored the role different ability distributions, sample sizes, and item architectures play in which of the 1PL, 2PL, and 3PL model have the best predictive fit. The first three simulation studies used exclusively unidimensional (a single ability factor); the fourth compared models with varying numbers of factors.
+
+Throughout, we identified the prediction-maximizing model according to the two predictive fit metrics. We also calculated which model AIC, BIC, and LRT selected in order to demonstrate how they perform vis-a-vis our two predictive metrics. Each simulation study involved many replications where a replication consisted of the following steps: (1) simulate data using the DGM, (2) fit a variety of models to the simulated data, (3) calculate ELPL-MR and ELPL-MP for each of the models, and (4) determine which model AIC, BIC, and LRT selected. For ELPL-MR and ELPL-MP, the model with the greatest value is the prediction-maximizing model. For AIC and BIC, the model with the lowest value is the selected model. For LRT, we conducted a sequence of tests so that, for example, if the 2PL model was statistically significant compared to the 1PL model but not the 3PL model, then the 2PL model was selected. In general, we say a model "wins" if it is optimal according to a specific measure. The DGM and models fit in steps (1) and (2) varied across simulation studies; steps (3) and (4) were consistent across the simulation studies.
+
+We used R for computing [@rcore]. We used the R package, mirt, to fit models using MMLE with the EM algorithm and 61 quadrature points [@chalmers2012mirt]. We used custom written functions to calculate ELPL-MR and ELPL-MP for each model. In particular, we calculated ELPL-MR using equation \ref{eq:elplmr2}. We estimated abilities using both MAP and EAP with the usual standard normal prior. Because results using EAP and MAP were nearly identical, we report only results using EAP ability estimates.^[Maximum likelihood ability estimates aren't feasible because of completely perfect and imperfect response vectors. Future work might consider alternatives like weighted likelihood estimates [@warm1989weighted].] We calculated ELPL-MP using equation \ref{eq:elplmp}. Integrals were approximated using Gauss-Hermite quadrature with 61 points [@embretson2013item]. We used the suite of R packages known as the tidyverse for data wrangling and visualization [@tidy]. Materials to reproduce this paper, including functions to estimate ELPL-MR and ELPL-MP, are available at [blinded GitHub link].
+
+## Methods for Simulation Study 1
+
+In Simulation Study 1, we revisited @kang2007irt who evaluated model selection methods (e.g., BIC) via their capacity to identify the model with the same parameterization as the DGM (e.g., a model selection method should choose the 3PL model if the 3PL DGM was used). We questioned whether the 3PL model actually had the best predictive fit in the conditions in which they conducted their simulation study. We focused on the six conditions from @kang2007irt that came from crossing the DGM (1PL, 2PL, or 3PL) and sample size (500 or 1000 persons). In each condition, we used 20 items and drew abilities from a normal distribution, \(\theta \sim N(0, 1)\). We used their exact item parameters as reported in Table 4 of @kang2007irt.\footnote{These were generated in the original study by randomly drawing difficulties from a normal distribution, \(b \sim N(0, 1)\), discriminations from a log-normal distribution, \(a \sim \text{Lognormal}(0, 0.5)\), and guessing parameters from a beta distribution, \(c \sim B(5, 17)\). For the 1PL model, all discriminations were set to 1 and all guessing parameters were set to 0. For the 2PL, we all guessing parameters were set to 0.} We conducted 500 replications for each condition. Our hypothesis was that the winning model—that is, the most predictive model—would not always have the same parameterization as the DGM, especially at lower sample sizes.
+
+## Results for Simulation Study 1
+
+Table \ref{tab:results1} shows the number of replications in which each model won. In the conditions with the 1PL or 2PL DGM, the prediction-maximizing model according to ELPL-MR and ELPL-MP nearly always shared the DGM's parameterization. In these conditions, the model selection methods, BIC, AIC, and LRT, nearly always selected this model with the exception that the LRT occasionally (\textasciitilde4\% of replications) chose the 2PL model when the prediction-maximizing model was the 1PL model. In contrast, with the 3PL DGM, the 2PL model often won based on our predictive metrics (i.e., the 2PL optimally predicted the out-of-sample data).  Under these conditions, @kang2007irt found that AIC often selected the 2PL model, which they interpreted as a failure of AIC. Our results instead indicate that if the goal is to identify the model with the greatest predictive fit, AIC may actually have been a useful metric. In general, LRT selects models consistent with ELPL-MP, while AIC and BIC selects models more consistent with ELPL-MR.
+
+The model with the greatest ELPL-MR was often simpler than the model with the greatest ELPL-MP. For example, with a 3PL DGM and 500 persons, the 2PL model outperformed the 3PL model in 488 out of 500 replications according to ELPL-MR and in 245 out of 500 replications according to ELPL-MP. We take this as evidence that ELPL-MR prefers more parsimonious models than ELPL-MP. Why is this so? Recall that the difference between ELPL-MP and ELPL-MR is how they treat ability. ELPL-MP assumes ability to be coming from a generic distribution, $g(\bm{\theta})$, whereas ELPL-MR actually estimates each person's ability. As a result, ELPL-MR requires estimation of more parameters (item parameters and a parameter for each person) than ELPL-MP (just item parameters). Estimation of additional parameters requires increased sample size. When we calculate ELPL-MR, we take the additional step of estimating each person's ability, which causes the imperfection in the item parameter estimates to propagate to the person abilities. On the other hand, when we calculate ELPL-MP, we just integrate over $g(\bm{\theta})$ which is much more tolerant of those imperfect item parameter estimates.^[An alternative way to understand ELPL-MP preferring more flexible models is through the lens of regularization. Regularization typically counters over-fitting by shrinking parameter estimates [@tibshirani1996regression]. In this case, ELPL-MP treating ability as coming from $g(\bm{\theta})$ effectively regularizes the likelihood by which the model is judged. As a result, overfitting is punished less harshly.]
+
+\setlength{\tabcolsep}{2pt}
+\begin{table}
+\caption{Simulation Study 1 results. Counts are of the winning model according to the theoretical predictive fit metrics, ELPL-MR and ELPL-MP, and the model selected by BIC, AIC, and LRT. With the 1PL and 2PL DGM, the predictive fit metrics find that the model with the same parameterization is the prediction-maximizing model and the model selection methods usually select this model. With the 3PL DGM, ELPL-MR tends to find that the 2PL model offers the best predictive fit, while ELPL-MP tends to find that the 3PL model offers the best predictive fit. LRT selects models consistent with ELPL-MP, while AIC and BIC selects models more consistent with ELPL-MR.}
+\centering
+\begin{small}
+\begin{tabular}{@{\extracolsep{2pt}}lllllllllllllllll}
+\hline
+&&\multicolumn{15}{c}{\textbf{Estimated Model}} \\ \cmidrule{3-17}
+\multirow{2}{*}{} &
+    &
+    \multicolumn{3}{c}{\textbf{ELPL-MR}} & 
+    \multicolumn{3}{c}{\textbf{ELPL-MP}} &
+    \multicolumn{3}{c}{\textbf{BIC}} &
+    \multicolumn{3}{c}{\textbf{AIC}} &
+    \multicolumn{3}{c}{\textbf{LRT}} \\ 
+    \cmidrule{3-5} \cmidrule{6-8} \cmidrule{9-11} \cmidrule{12-14} \cmidrule{15-17}
+DGM & Persons & 1PL & 2PL & 3PL & 1PL & 2PL & 3PL & 1PL & 2PL & 3PL & 1PL & 2PL & 3PL & 1PL & 2PL & 3PL  \\
+\hline
+1PL & 500 & 500 & 0 & 0 & 500 & 0 & 0 & 500 & 0 & 0 & 497 & 3 & 0 & 480 & 20 & 0   \\
+1PL & 1000 & 500 & 0 & 0 & 500 & 0 & 0 & 500 & 0 & 0 & 499 & 1 & 0 & 482 & 18 & 0 \\
+2PL & 500 & 0 & 499 & 1 & 0 & 499 & 1 & 0 & 500 & 0 & 0 & 0 & 500 & 0 & 500 & 0\\
+2PL & 1000 & 0 & 498 & 2 & 0 & 500 & 0 & 0 & 500 & 0 & 0 & 0 & 500 & 0 & 499 & 0 \\
+3PL & 500 & 0 & 488 & 12 & 0 & 245 & 255 & 86 & 414 & 0 & 0 & 388 & 112 & 0 & 246 & 254\\
+3PL & 1000 & 0 & 407 & 93 & 0 & 11 & 489 & 0 & 500 & 0 & 0 & 136 & 364 & 0 & 44 & 456\\
+\hline
+\end{tabular}
+\end{small}
+\label{tab:results1}
+\end{table}
+
+```{r r1}
+######## CODE TO GET VALUES FOR TABLE ABOVE ########
+# lrselect <- function(x){
+# 	if(x[2] > 0.05){
+# 		return(1)
+# 	} else if(x[3] < 0.05){
+# 		return(3)
+# 	}
+# 	return(2)
+# }
+# sim1 <-
+# 	read_rds("sims/sim1.rds") %>% 
+# 	mutate(
+# 		MR = out %>% map_dbl(~ which.max(.$elplMR)),
+# 		MP = out %>% map_dbl(~ which.max(.$elplMP)),
+# 		aic = out %>% map_dbl(~ which.min(.$AIC)),
+# 		bic = out %>% map_dbl(~ which.min(.$BIC)),
+# 		lr = out %>% map_dbl(~ lrselect(.$p_from_lr))
+# 	)
+# 
+# sim1 %>% 
+# 	count(true_model, n_students, MR) %>% 
+# 	mutate(MR = paste0("MR", MR))%>% 
+# 	spread(MR, n)
+# 
+# sim1 %>% 
+# 	count(true_model, n_students, MP) %>% 
+# 	mutate(MP = paste0("MP", MP)) %>% 
+# 	spread(MP, n)
+# 
+# sim1 %>% 
+# 	count(true_model, n_students, bic) %>% 
+# 	mutate(bic = paste0("bic", bic)) %>% 
+# 	spread(bic, n)
+# 
+# sim1 %>% 
+# 	count(true_model, n_students, aic) %>% 
+# 	mutate(aic = paste0("aic", aic))%>% 
+# 	spread(aic, n)
+# 
+# sim1 %>% 
+# 	count(true_model, n_students, lr) %>% 
+# 	mutate(lr = paste0("lr", lr))%>% spread(lr, n)
+```

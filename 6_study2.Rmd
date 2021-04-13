@@ -1,0 +1,45 @@
+## Methods for Simulation Study 2
+
+Simulation Study 1 found that with the 3PL DGM, the 2PL model was frequently best according to predictive performance metrics, especially if the number of persons was relatively small. Simulation Study 2 builds on this observation by exploring the role of sample size (i.e., number of persons) and ability distribution in determining which model best fits a 3PL DGM. In Simulation Study 2, we used the 3PL DGM, 20 items, and item parameters from @kang2007irt. We conducted 2000 replications, each of which was as follows. We drew the number of persons from a discrete uniform distribution, \(I \sim \text{unif}\{100, 10000\}\). We drew abilities from a normal distribution, \(\theta_i \sim N(\mu_{\theta} , 1)\), where the mean of that distribution was drawn from a continuous uniform distribution, \(\mu_{\theta} \sim \text{unif}(-2, 2)\). As before, we simulated data using these parameters, fit the 1PL, 2PL, and 3PL models, determined the best fitting model according to ELPL-MR and ELPL-MP, and identified the model selected by BIC, AIC, and LRT.
+
+## Results for Simulation Study 2
+
+Figure \ref{fig:results4b} shows the prediction-maximizing model according to ELPL-MP and ELPL-MR as well as the model selected by BIC, AIC, and LRT. As in Simulation Study 1, ELPL-MR preferred more parsimonious models as evidenced by the 2PL model winning more frequently according to ELPL-MR than according to ELPL-MP. As anticipated, the greater the number of persons, \(I\), the more likely the 3PL model was to win. However, the ability distribution is also salient. As \(\mu_{\theta}\) increased, the 3PL became less likely to win. This is to be expected; guessing plays less of a role for high ability persons, which decreases the predictive value of the model including a guessing parameter. LRT and AIC selected tended to select the prediction-maximizing model according to ELPL-MP. BIC selected models more in line with the prediction-maximizing model according to ELPL-MR.
+
+Figure \ref{fig:results4b} can be read in terms of minimum sample requirements for the 3PL model (although results may depend somewhat on the specific set of item parameters). When \(\mu_{\theta}\) is less than 0, the sample size at which the 3PL model tended to outperform the 2PL model was somewhat low (\(\approx 2000\)) according to ELPL-MP, and it was a bit higher according to ELPL-MR. As \(\mu_{\theta}\) increased, the relative predictive performance of the 3PL model decreased quickly, so much so that, for ELPL-MR, the 3PL model nearly never won when \(\mu_{\theta}\) was greater than one.
+
+```{r results4b, fig.cap = 'Simulation Study 2 results. Each point corresponds to the prediction-maximizing model according to the predictive fit metrics, ELPL-MR and ELPL-MP, or the model selected by BIC, AIC, or LRT for one of 2000 replications. The 3PL model was most likely to offer the best fit and be selected with more persons and at lower mean ability (guessing is more prominent). For the predictive fit metrics, ELPL-MP preferred more flexible models than ELPL-MR. For the model selection methods, LRT and AIC preferred more flexible models than BIC.', fig.width=7, fig.height=3}
+
+lrselect <- function(x){
+	if(x[2] > 0.05){
+		return(1)
+	} else if(x[3] < 0.05){
+		return(3)
+	}
+	return(2)
+}
+
+read_rds("sims/sim2.rds") %>%
+	filter(true_model == "3PL") %>%
+	select(-n_items, -true_model, -MRwin, -MPwin) %>%
+	mutate(
+		`ELPL-MR` = out %>% map_dbl(~ which.max(.$elplMR)),
+		`ELPL-MP` = out %>% map_dbl(~ which.max(.$elplMP)),
+		AIC = out %>% map_dbl(~ which.min(.$AIC)),
+		BIC = out %>% map_dbl(~ which.min(.$BIC)),
+		LRT = out %>% map_dbl(~ lrselect(.$p_from_lr))
+	) %>% 
+	select(-out) %>% 
+	gather(var, val, -n_students, -theta_mu) %>% 
+	mutate(var = factor(var, levels = c("ELPL-MR", "ELPL-MP", "BIC", "AIC", "LRT"))) %>% 
+	mutate(`Winning model` = paste0(val, "PL")) %>%
+	rename(`N persons` = n_students, `Mean ability` = theta_mu) %>% 
+	ggplot(aes(x = `Mean ability`, y = `N persons`, color = `Winning model`)) +
+	geom_point(alpha = 0.5) +
+	facet_wrap(~ var, nrow = 1) +
+	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
+	labs(
+		x = latex2exp::TeX("$\\mu_{\\theta}$ (mean ability)"),
+		y = latex2exp::TeX("$I$ (number of persons)")
+	)
+```

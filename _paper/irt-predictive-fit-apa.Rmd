@@ -1,0 +1,118 @@
+---
+title             : "Predictive Fit Metrics for Item Response Models"
+shorttitle        : "IRT Predictive Fit"
+
+author: 
+  - name          : "Benjamin A. Stenhaug"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "450 Serra Mall, Stanford, CA 94305"
+    email         : "stenhaug@stanford.edu"
+  - name          : "Benjamin W. Domingue"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "The Graduate School of Education at Stanford University"
+
+authornote: | 
+  The research reported here was supported by the Institute of Education Sciences, U.S. Department of Education, through Grant R305B140009 to the Board of Trustees of the Leland Stanford Junior University. The opinions expressed are those of the author and do not represent views of the Institute or the U.S. Department of Education. The research reported here was also supported by The Spencer Foundation Grant 201700082. We thank Klint Kanopka and Michael C. Frank for their invaluable feedback on drafts of this work.
+
+abstract: |
+  The fit of an item response model is typically conceptualized as whether a given model could have generated the data. We advocate for an alternative view of fit, ``predictive fit,'' based on the model's ability to predict new data. We derive two predictive fit metrics for item response models that assess how well an estimated item response model fits the data-generating model. These metrics are based on long-run out-of-sample predictive performance (i.e., if the data-generating model produced infinite amounts of data, what is the quality of a model's predictions on average?). The fundamental difference between these metrics is the definition of out-of-sample on which they are built, which is complicated by item responses being cross-classified within items and persons. We conduct simulation studies to identify the prediction-maximizing model across a variety of conditions including number of persons, average person ability, item discrimination, item guessability, and correlation between multiple factors. In general, we show that considering persons to be out-of-sample---as psychometricians often do---leads to a preference for more flexible models (i.e., those with more item parameters). In each simulation, we compare the prediction-maximizing model to the model selected by AIC, BIC, and likelihood ratio tests. We find that performance of these methods depends on the prediction task of interest. In general, likelihood ratio tests often select overly flexible models, while BIC selects overly parsimonious models. We use PISA data to demonstrate how to use cross-validation to directly estimate the predictive fit metrics in practice. We discuss implications for item response model selection in operational settings.
+  
+keywords          : "Item response theory; Fit; Prediction; Model comparison; Cross-validation"
+
+bibliography      : ["irt-predictive-fit.bib"]
+
+header-includes: 
+- \usepackage{mathptmx} % this makes as close to times new roman font, need to edit tex to get 12pt
+- \usepackage{amsmath}
+- \usepackage{bm}
+- \makeatletter % this fixed the table going in the middle of the page https://tex.stackexchange.com/questions/40257/table-in-latex-appearing-in-middle-of-next-page
+- \setlength{\@fptop}{0pt}
+- \@fpsep\textheight % for separate page https://tex.stackexchange.com/questions/22191/forcing-a-figure-strictly-on-a-separate-page
+- \makeatother
+- \interfootnotelinepenalty=10000
+- \usepackage{setspace}
+- \AtBeginEnvironment{tabular}{\singlespacing}
+- \AtBeginEnvironment{lltable}{\singlespacing}
+- \AtBeginEnvironment{tablenotes}{\doublespacing}
+- \captionsetup[table]{font={stretch=1}}
+- \captionsetup[figure]{font={stretch=1}}
+
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+documentclass     : "apa7"
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+    fig.align='center',
+    echo=FALSE,
+    warning=FALSE,
+    message=FALSE,
+    fig.retina = 3
+)
+
+library(tidyverse)
+library(patchwork)
+library(here)
+theme_set(theme_bw())
+```
+
+```{r child = "../2_introduction.Rmd"}
+```
+
+# Out-of-sample for Item Response Data {#oos}
+
+```{r child = "../3_out_of_sample.Rmd"}
+```
+
+# Predictive Fit Metrics {#pfm}
+
+```{r child = "../4_predictive_fit_metrics.Rmd"}
+```
+
+# Simulation Studies {#sim}
+
+```{r child = "../5_study1.Rmd"}
+```
+
+```{r child = "../6_study2.Rmd"}
+```
+
+```{r child = "../7_study3.Rmd"}
+```
+
+```{r child = "../8_study4.Rmd"}
+```
+
+# Predictive Fit in Practice via Cross-validation {#real}
+
+```{r child = "../9_realworld.Rmd"}
+```
+
+# Discussion {#dis}
+
+```{r child = "../10_discussion.Rmd"}
+```
+
+\clearpage
+
+# References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup

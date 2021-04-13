@@ -1,0 +1,43 @@
+## Methods for Simulation Study 4
+
+Each of the previous simulation studies looked at models with varying item complexity (e.g., 1PL, 2PL, and 3PL) but a fixed single latent ability factor. In Simulation Study 4, we invert our focus by always using a 2PL model, but varying the number of latent ability factors. For example, the 2-factor 2PL (hereafter 2F 2PL) model is specified as
+\begin{align}
+\text{Pr}(Y_{ij}) = F(a_{j1}\theta_{i1} + a_{j2} \theta_{i2} + b_j)
+\end{align}
+where, for example, \(a_{j2}\) is the \(j\)th item's loading on the 2nd factor, and \(\theta_{i2}\) is the \(i\)th person's score for the 2nd factor [@reckase2009multidimensional]. Our questions are similar as in the previous simulation studies: For example, if the DGM is a 2F 2PL model, does a 1F 2PL model or 2F 2PL model best fit the DGM at a variety of sample sizes according to ELPL-MR and ELPL-MP?
+
+Accordingly, Simulation Study 4 used exclusively the 2F 2PL DGM. As with the previous simulation studies, we considered only 20 items. We conducted 2000 runs, each of which was as follows. We drew item easiness parameters from the standard normal distribution, \(b \sim N(0, 1)\). We drew item discrimination parameters independently\footnote{In particular, each item's loading on each factor was independent so that the first item's loading on the first factor was independent of its loading on the second factor.} from a log-normal distribution, \(a \sim \text{Lognormal}(0, 0.5)\). We drew the number of persons from a discrete uniform distribution, \(I \sim \text{unif}\{500, 10000\}\). We drew abilities from a multidimensional normal distribution with mean vector {[}\(\mu_{\theta_1} = 0\), \(\mu_{\theta_2} = 0\){]} and covariance matrix \(\begin{bmatrix} 1 & v \\ v & 1 \end{bmatrix}\) where \(v\) is the correlation between factors and captures the degree to which persons with a high first factor score tend to have a high second factor score. For example, if the first factor is addition, and the second factor is subtraction, then we might expect \(v\) to be high. We can think of \(v\) as essentially making dimensionality continuous: At \(v = 1\), ability is unidimensional, at \(v = 0\), ability is fully two-dimensional, and at \(v = 0.5\), ability is somewhere between one and two dimensional. We drew \(v\) from a continuous uniform distribution, \(v \sim \text{unif}(0, 1)\). We conducted 2000 such replications.
+
+## Results for Simulation Study 4
+
+Figure \ref{fig:results6a} shows the winning model for each run according to ELPL-MP (left) and ELPL-MR (right). As before, ELPL-MR preferred more parsimonious models, with the 1F 2PL winning slightly more frequently according to ELPL-MR than ELPL-MP. We focus here on the role of the correlation between factors, \(v\). In general, as \(v\) increased, the 1F 2PL was more likely to win. As with Simulation Study 2, we can read these results in terms of minimum sample requirements for the 2F 2PL model. Under these conditions, the 2F 2PL was best according to both metrics whenever \(v < 0.5\) (at least up to our minimum sample size of \(I = 500\) persons). For greater values of \(v\), the 1F 2PL was more often best, especially for lower sample sizes and according to ELPL-MR. Lastly, it's worth noting that the 2F 2PL typically won according to both metrics for \(v\) near 0.7 and \(I\) close to 10,000 persons, which suggests that at large sample sizes it's possible for multi-factor item response models to disentangle highly correlated factors.
+
+```{r results6a, fig.cap = 'Simulation Study 4 results. Each point corresponds to the prediction-maximizing model according to the predictive fit metrics, ELPL-MR and ELPL-MP, or the model selected by BIC, AIC, or LRT for one of 2000 replications. The prediction-maximizing and selected model was more likely to be the 2F 2PL with lower correlation between factors and more persons. LRT nearly always selected the 2F 2PL model even in replications where both ELPL-MP and ELPL-MR identified the 1F 2PL model as prediction-maximizing. AIC selected models largely consistent with ELPL-MP. BIC selected models more closely aligned to ELPL-MR.', fig.width=7, fig.height=3}
+
+read_rds("sims/sim4.rds") %>%
+	rename(v = p) %>%
+	unnest_wider(out) %>%
+	mutate(
+		`ELPL-MR` = ifelse(f1_elplMR > f2_elplMR, "1F 2PL", "2F 2PL"),
+		`ELPL-MP` = ifelse(f1_elplMP > f2_elplMP, "1F 2PL", "2F 2PL"),
+		AIC = ifelse(f1_AIC < f2_AIC, "1F 2PL", "2F 2PL"),
+		BIC = ifelse(f1_BIC < f2_BIC, "1F 2PL", "2F 2PL"),
+		LRT = ifelse(p > 0.05, "1F 2PL", "2F 2PL")
+	) %>%
+	select(dim:n_students, `ELPL-MR`:LRT) %>%
+	gather(var, val, -(dim:n_students)) %>%
+	mutate(var = factor(var, levels = c("ELPL-MR", "ELPL-MP", "BIC", "AIC", "LRT"))) %>%
+	ggplot(aes(x = v, y = n_students, color = val)) +
+	geom_point(alpha = 0.4) +
+	facet_wrap(~ var, nrow = 1) +
+	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+	labs(
+		x = latex2exp::TeX("$v$ (correlation between factors)"),
+		y = "I persons",
+		color = "Winning model"
+	) +
+	guides(colour = guide_legend(override.aes = list(alpha = 1))) +
+	theme(legend.position = "right") +
+	theme_bw(base_size = 8) +
+	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```

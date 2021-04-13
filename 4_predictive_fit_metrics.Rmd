@@ -1,0 +1,40 @@
+We now derive a predictive fit metric for each of \(\tilde Y^{\text{MR}}\) and \(\tilde Y^{\text{MP}}\). These metrics can only be calculated exactly when the DGM is known such as in a simulation study (we later describe how to use cross-validation to estimate these metrics in practice). When the DGM is known, we can directly measure a model's predictive performance on the \emph{distribution of data} produced by the DGM. Conceptually, this is equivalent to using the DGM to simulate an infinite amount of out-of-sample data, and then measuring a model's fit to the DGM based on its predictive performance for this (infinite) out-of-sample data. In particular, the metrics measure how well a model predicts all possible out-of-sample matrices that the DGM might produce, weighted by their probability of being produced. Both metrics begin with the likelihood of a single \(\tilde{Y}\) according to a model fit to \(Y\), which we generically denote \(\text{model}(Y)\). This is known as log predictive likelihood (lpl), which can be thought of as a function that takes \(\tilde Y\) and a model fit to \(Y\) as inputs and outputs the log likelihood of \(\tilde Y\) according to that model [@gelman2014understanding]:
+\begin{align}
+\text{lpl}(\tilde{Y}, \text{model}(Y))  = \log \hat{\text{Pr}}(\tilde{Y} | \text{model}(Y)).
+\end{align}
+
+## Metric 1: Expected Log Predictive Likelihood for Missing Responses (ELPL-MR)
+
+Calculation of log predictive likelihood of missing responses (lpl-MR) for $\tilde Y^{\text{MR}}$ is relatively straightforward because we can use estimates of person abilities so that
+\begin{align}
+\text{lpl-MR}(\tilde Y^{\text{MR}}, \text{model}(Y)) = \log \hat{\text{Pr}}(\tilde Y^{\text{MR}} | \text{model}(Y)) = \sum_{i=1}^{I} \sum_{j=1}^{J} \log \hat{\text{Pr}}(\tilde y_{ij}^{\text{MR}} | \bm{\hat\psi_j}, \bm{\hat\theta_i})
+\end{align}
+where $\tilde y_{ij}^{\text{MR}}$ is an item response from $Y^{\text{MR}}$, $\bm{\hat\psi_j}$ is item $j$'s vector of parameter estimates from $\text{model}(Y)$, and $\bm{\hat\theta_i}$ is person $i$'s vector of ability estimates from $\text{model}(Y)$. We use the short-hand $\hat p_{i, j}^{\text{MR}} = \hat{\text{Pr}}(y_{i, j}^{\text{MR}} = 1 | \bm{\hat\psi_j}, \bm{\hat\theta_i})$. To be concrete, in the case of the unidimensional 2PL model specification
+\begin{align}
+\text{lpl-MR}(\tilde Y^{\text{MR}}, \text{model}(Y)) = \\ \sum_{i=1}^{I} \sum_{j=1}^{J} \tilde y_{ij}^{\text{MR}} \log \left(\hat p_{i, j}^{\text{MR}}\right) + (1 - \tilde y_{ij}^{\text{MR}})\log\left(1 - \hat p_{i, j}^{\text{MR}}\right) = \\\sum_{i=1}^{I} \sum_{j=1}^{J} \tilde y_{ij}^{\text{MR}} \log \left(F(\hat a_j\hat \theta_i + \hat b_j)\right) + (1 - \tilde y_{ij}^{\text{MR}})\log\left(1 - F(\hat a_j\hat \theta_i + \hat b_j)\right).
+\end{align}
+
+Of course, there are many possible out-of-sample item response matrices $\tilde Y^{\text{MR}}$. The measure of model performance should be reflective of the DGM in general, not one particular $\tilde Y^{\text{MR}}$. The DGM is captured simply by $p_{i, j}^{\text{MR}}$, the data-generating probability of $y_{ij}^{\text{MR}}$ being responded to correctly. If the DGM is an item response model, $p_{i, j}^{\text{MR}} = \text{Pr}(y_{i, j}^{\text{MR}} = 1 | \bm{\psi_j}, \bm{\theta_i})$. The out-of-sample predictive performance metric of interest is Expected Log Predictive Likelihood for Missing Responses (ELPL-MR), which is the expectation of lpl:
+\begin{align}
+\text{ELPL-MR}(\text{model(Y)}) &= \mathbb{E}\left[\text{lpl}(\tilde Y^{\text{MR}}, \text{model}(Y))\right] \\ &= \sum_{i=1}^{I} \sum_{j=1}^{J} p_{i, j} \log (\hat p_{i, j}) + (1 - {p_{i, j}})\log(1 - \hat p_{i, j}) \label{eq:elplmr2}.
+\end{align}
+In essence, ELPL-MR can be thought of as a function that takes a model fit to $Y$ as input and outputs the expectation of the log likelihood of $\tilde Y^{\text{MR}}$.
+
+One way to think about equation \ref{eq:elplmr2} is that ELPL-MR is the weighted average of the log likelihood, where the weights are determined by the true probabilities. As a simple example, consider a model that predicts that an item response will be correct at a rate of $0.8$ but the true data-generating probability is $0.9$. The long-run log likelihood of the item response according to the model is $0.9 \log 0.8 + 0.1 \log 0.2 \approx -0.36$. Translating back to the probability scale, the long-run likelihood is $\exp(-0.36) \approx 0.70$.
+
+## Metric 2: Expected Log Predictive Likelihood for Missing Persons (ELPL-MP)
+
+We now derive the predictive fit metric for when the prediction task is the vector of responses for persons not known to the model as is a row vector, $\bm{y_u}^{\text{MP}}$, from $\tilde Y^{\text{MP}}$. Calculation of log predictive likelihood of missing persons (lpl-MP) for $\tilde Y^{\text{MP}}$ is complicated by the fact that the persons in $\tilde Y^{\text{MP}}$ are out-of-sample and therefore unobserved in $Y$; hence, ability estimates are unavailable. However, as is standard in MMLE, we can calculate a marginalized likelihood by taking the expectation over $\hat g(\bm{\theta})$, the distribution of ability as estimated by the model. We begin by calculating the lpl of $\bm{y_u}^{\text{MP}}$:
+\begin{align}
+\text{lpl-MP}(\bm{y_u^\text{MP}}, \text{model}(Y)) = \int \hat{\text{Pr}}(\bm{y_u^\text{MP}}|\theta) \hat g(\theta) d\bm{\theta} = \int \left[\prod_{j=1}^{J} \hat{\text{Pr}}(y_{uj}^\text{MP}) | \bm{\hat\psi_j}, \theta) \right] \hat g(\theta) d\bm{\theta}
+\end{align}
+
+Next, we need to account for the data-generating distribution of $\tilde Y^{\text{MP}}$, which is captured by $\pi_u$, the probability of a random person from the DGM producing $y_u$. There are $U$ possible response patterns (e.g., a dichotomous test with $J$ items has $U = 2^J$ possible response patterns). Assuming the DGM is an item response model, we calculate $\pi_u$ as follows: 
+\begin{align}
+\pi_u = \int {\text{Pr}}(\bm{y_u^\text{MP}}|\theta) g(\bm{\theta}) d\bm{\theta} = \int \left[\prod_{j=1}^{J} {\text{Pr}}(y_{uj}^\text{MP}) | \bm{\psi_j}, \theta) \right] g(\bm{\theta}) d\bm{\theta}.
+\end{align}
+The out-of-sample predictive performance metric of interest is Expected Log Predictive Likelihood for Missing Persons (ELPL-MP), which is the expectation of lpl over each possible $\bm{y_u}$:
+\begin{align}
+\text{ELPL-MP}(\text{model}(Y)) &= \mathbb{E}\left[\text{lpl}(\bm{y_u^\text{MP}}, \text{model}(Y))\right] \\ &= \sum_{u=1}^{U} \pi_u \cdot \text{lpl}(\bm{y_u^\text{MP}}, \text{model}(Y)) \\ &= \sum_{u=1}^{U} \pi_u \cdot \left( \int \left[\prod_{j=1}^{J} \hat{\text{Pr}}(y_{uj} | \bm{\hat\psi_j}, \theta) \right] \hat g(\theta) d\bm{\theta} \right) \label{eq:elplmp}
+\end{align}
+As with ELPL-MR, ELPL-MP can be thought of as a function that takes a model fit to $Y$ as input and outputs the expectation of the log likelihood of $\tilde Y^{\text{MP}}$. In practice, integrals can be approximated using Gauss-Hermite quadrature [@embretson2013item].

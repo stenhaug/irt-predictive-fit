@@ -4,7 +4,7 @@ Each of the previous simulation studies looked at models with varying item compl
 \begin{align}
 \text{Pr}(Y_{ij}) = F(a_{j1}\theta_{i1} + a_{j2} \theta_{i2} + b_j)
 \end{align}
-where, for example, \(a_{j2}\) is the \(j\)th item's loading on the 2nd factor, and \(\theta_{i2}\) is the \(i\)th person's score for the 2nd factor [@reckase2009multidimensional]. Our questions are similar as in the previous simulation studies: For example, if the DGM is a 2F 2PL model, does a 1F 2PL model or 2F 2PL model best fit the DGM at a variety of sample sizes according to ELPL-MR and ELPL-MP?
+where, for example, \(a_{j2}\) is the \(j\)th item's loading on the 2nd factor, and \(\theta_{i2}\) is the \(i\)th person's score for the 2nd factor [@reckase2009multidimensional]. Our questions are similar as in the previous simulation studies: For example, if the DGM is a 2F 2PL model, when does a 1F 2PL model make better predictions for new data from the DGM as measured by ELPL-MR and ELPL-MP?
 
 Accordingly, Simulation Study 4 used exclusively the 2F 2PL DGM. As with the previous simulation studies, we considered only 20 items. We conducted 2000 runs, each of which was as follows. We drew item easiness parameters from the standard normal distribution, \(b \sim N(0, 1)\). We drew item discrimination parameters independently\footnote{In particular, each item's loading on each factor was independent so that the first item's loading on the first factor was independent of its loading on the second factor.} from a log-normal distribution, \(a \sim \text{Lognormal}(0, 0.5)\). We drew the number of persons from a discrete uniform distribution, \(I \sim \text{unif}\{500, 10000\}\). We drew abilities from a multidimensional normal distribution with mean vector {[}\(\mu_{\theta_1} = 0\), \(\mu_{\theta_2} = 0\){]} and covariance matrix \(\begin{bmatrix} 1 & v \\ v & 1 \end{bmatrix}\) where \(v\) is the correlation between factors and captures the degree to which persons with a high first factor score tend to have a high second factor score. For example, if the first factor is addition, and the second factor is subtraction, then we might expect \(v\) to be high. We can think of \(v\) as essentially making dimensionality continuous: At \(v = 1\), ability is unidimensional, at \(v = 0\), ability is fully two-dimensional, and at \(v = 0.5\), ability is somewhere between one and two dimensional. We drew \(v\) from a continuous uniform distribution, \(v \sim \text{unif}(0, 1)\). We conducted 2000 such replications.
 
@@ -38,6 +38,6 @@ read_rds("sims/sim4.rds") %>%
 	) +
 	guides(colour = guide_legend(override.aes = list(alpha = 1))) +
 	theme(legend.position = "right") +
-	theme_bw(base_size = 8) +
+	theme_bw(base_size = 10) +
 	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```

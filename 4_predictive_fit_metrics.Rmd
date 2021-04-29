@@ -5,7 +5,7 @@ We now derive a predictive fit metric for each of \(\tilde Y^{\text{MR}}\) and \
 
 ## Metric 1: Expected Log Predictive Likelihood for Missing Responses (ELPL-MR)
 
-Calculation of log predictive likelihood of missing responses (lpl-MR) for $\tilde Y^{\text{MR}}$ is relatively straightforward because we can use estimates of person abilities so that
+Calculation of log predictive likelihood of missing responses (lpl-MR) for a single $\tilde Y^{\text{MR}}$ is relatively straightforward because we can use estimates of person abilities so that
 \begin{align}
 \text{lpl-MR}(\tilde Y^{\text{MR}}, \text{model}(Y)) = \log \hat{\text{Pr}}(\tilde Y^{\text{MR}} | \text{model}(Y)) = \sum_{i=1}^{I} \sum_{j=1}^{J} \log \hat{\text{Pr}}(\tilde y_{ij}^{\text{MR}} | \bm{\hat\psi_j}, \bm{\hat\theta_i})
 \end{align}
@@ -26,12 +26,12 @@ One way to think about equation \ref{eq:elplmr2} is that ELPL-MR is the weighted
 
 We now derive the predictive fit metric for when the prediction task is the vector of responses for persons not known to the model as is a row vector, $\bm{y_u}^{\text{MP}}$, from $\tilde Y^{\text{MP}}$. Calculation of log predictive likelihood of missing persons (lpl-MP) for $\tilde Y^{\text{MP}}$ is complicated by the fact that the persons in $\tilde Y^{\text{MP}}$ are out-of-sample and therefore unobserved in $Y$; hence, ability estimates are unavailable. However, as is standard in MMLE, we can calculate a marginalized likelihood by taking the expectation over $\hat g(\bm{\theta})$, the distribution of ability as estimated by the model. We begin by calculating the lpl of $\bm{y_u}^{\text{MP}}$:
 \begin{align}
-\text{lpl-MP}(\bm{y_u^\text{MP}}, \text{model}(Y)) = \int \hat{\text{Pr}}(\bm{y_u^\text{MP}}|\theta) \hat g(\theta) d\bm{\theta} = \int \left[\prod_{j=1}^{J} \hat{\text{Pr}}(y_{uj}^\text{MP}) | \bm{\hat\psi_j}, \theta) \right] \hat g(\theta) d\bm{\theta}
+\text{lpl-MP}(\bm{y_u^\text{MP}}, \text{model}(Y)) = \int \hat{\text{Pr}}(\bm{y_u^\text{MP}}|\bm{\theta}) \hat g(\bm{\theta}) d\bm{\theta} = \int \left[\prod_{j=1}^{J} \hat{\text{Pr}}(y_{uj}^\text{MP}) | \bm{\hat\psi_j}, \bm{\theta}) \right] \hat g(\bm{\theta}) d\bm{\theta}
 \end{align}
 
 Next, we need to account for the data-generating distribution of $\tilde Y^{\text{MP}}$, which is captured by $\pi_u$, the probability of a random person from the DGM producing $y_u$. There are $U$ possible response patterns (e.g., a dichotomous test with $J$ items has $U = 2^J$ possible response patterns). Assuming the DGM is an item response model, we calculate $\pi_u$ as follows: 
 \begin{align}
-\pi_u = \int {\text{Pr}}(\bm{y_u^\text{MP}}|\theta) g(\bm{\theta}) d\bm{\theta} = \int \left[\prod_{j=1}^{J} {\text{Pr}}(y_{uj}^\text{MP}) | \bm{\psi_j}, \theta) \right] g(\bm{\theta}) d\bm{\theta}.
+\pi_u = \int {\text{Pr}}(\bm{y_u^\text{MP}}|\bm{\theta}) g(\bm{\theta}) d\bm{\theta} = \int \left[\prod_{j=1}^{J} {\text{Pr}}(y_{uj}^\text{MP}) | \bm{\psi_j}, \theta) \right] g(\bm{\theta}) d\bm{\theta}.
 \end{align}
 The out-of-sample predictive performance metric of interest is Expected Log Predictive Likelihood for Missing Persons (ELPL-MP), which is the expectation of lpl over each possible $\bm{y_u}$:
 \begin{align}

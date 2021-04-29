@@ -1,6 +1,6 @@
 ## Methods for Simulation Study 3
 
-Simulation Studies 1 and 2 both used item parameters from @kang2007irt. In Simulation Study 3, we simulated item parameters with the goal of understanding how different item architectures---What is effect of discrimination? Of item easiness? Of guessing?---effect which model wins according to ELPL-MR and ELPL-MP. Simulation Study 3 again exclusively used the 3PL DGM. We first created nine conditions by crossing the vector of guessing parameters \(c\) (fixed to 0.03, 0.10, 0.25 for all items) and the sample size (set to 1000, 5000, or 10000 persons). We conducted 1000 replications in each condition, each of which was as follows. We drew 20 item easiness parameters from a normal distribution, \(b \sim N(\mu_{\text{easy}, 1})\), and we drew the mean of that distribution from a continuous uniform distribution, \(\mu_{\theta} \sim \text{unif}(-2, 2)\). Similarly, we drew 20 item discrimination parameters from a log-normal distribution, \(a \sim \text{Lognormal}(\mu_{a}, 0.5)\), and we drew \(\mu_{a}\) from a continuous uniform distribution, \(\mu_{a} \sim \text{unif}(-0.5, 1.5)\). Note that \(\mu_{a}\) is the log of the median of the log-normal distribution so, for example, when \(\mu_{a} = -0.5\), the expected median item discrimination is \(\exp(-0.5) \approx 0.61\). As in Simulation Study 1 and 2, for each replication, we fit the 1PL, 2PL, and 3PL models determined the best fitting model according to ELPL-MR and ELPL-MP, and identified the model selected by BIC, AIC, and LRT.
+Simulation Studies 1 and 2 both used item parameters from @kang2007irt. In Simulation Study 3, we simulated item parameters with the goal of understanding how different item architectures—the distribution of easiness, discrimination, and guessing—effect which model wins according to ELPL-MR and ELPL-MP. Simulation Study 3 again exclusively used the 3PL DGM. We first created nine conditions by crossing the vector of guessing parameters \(c\) (set to 0.03, 0.10, 0.25 for all items) and the sample size (set to 1000, 5000, or 10000 persons). We conducted 1000 replications in each condition, each of which was as follows. We drew 20 item easiness parameters from a normal distribution, \(b \sim N(\mu_{\text{easy}, 1})\), and we drew the mean of that distribution from a continuous uniform distribution, \(\mu_{\theta} \sim \text{unif}(-2, 2)\). Similarly, we drew 20 item discrimination parameters from a log-normal distribution, \(a \sim \text{Lognormal}(\mu_{a}, 0.5)\), and we drew \(\mu_{a}\) from a continuous uniform distribution, \(\mu_{a} \sim \text{unif}(-0.5, 1.5)\). Note that \(\mu_{a}\) is the log of the median of the log-normal distribution so, for example, when \(\mu_{a} = -0.5\), the expected median item discrimination is \(\exp(-0.5) \approx 0.61\). As in Simulation Study 1 and 2, for each replication, we fit the 1PL, 2PL, and 3PL models determined the prediction-maximizing model according to ELPL-MR and ELPL-MP, and identified the model selected by BIC, AIC, and LRT.
 
 ## Results for Simulation Study 3
 
@@ -8,15 +8,15 @@ Figure \ref{fig:results5b1} shows the prediction-maximizing model for each repli
 
 As anticipated, the guessing parameter played a prominent role: The 3PL model usually won when \(c = 0.25\), with the lowest sample size \(I = 1000\) using ELPL-MR as an exception. Our original hypothesis was that \(c = 0.03\) was a nearly ignorable level of guessing and consequently that the 3PL model would not perform well. That turned out not to be the case: The 3PL model won somewhat frequently even when \(c = 0.03\). Turning to discrimination, as \(\mu_{a}\) increased (so that overall item discrimination increased), the 2PL model performed worse. This result might seem counter-intuitive, but consider the following: For items with very high discriminations (i.e., nearly @guttman1974basis items), low-ability persons have very low probabilities of correct responses under the 2PL model, whereas in fact the true probability is never below the guessing parameter. This leads to the 2PL model performing poorly for items generated with high discrimination and some guessing.
 
-```{r results5b1, fig.cap = 'Simulation Study 3 results for the predictive fit metrics, ELPL-MR and ELPL-MP. Each point corresponds to the prediction-maximizing model from one of 1000 replications. The 3PL model was most likely to offer the best fit with greater item discrimination, more difficult items, and more persons. ELPL-MP preferred the 3PL model more often than ELPL-MR did.', fig.width = 7, fig.height = 3}
+```{r results5b1, fig.cap = 'Simulation study 3 results for the predictive fit metrics, ELPL-MR and ELPL-MP. Each point corresponds to the prediction-maximizing model from one of 1000 replications. The 3PL model was most likely to offer the best fit with greater item discrimination, more difficult items, and more persons. ELPL-MP preferred the 3PL model more often than ELPL-MR did.', fig.width = 7, fig.height = 3}
 
 thr <- read_rds("sims/sim3.rds")
 
 mrgraph <- 
 	thr %>%
 	mutate(`Winning model` = paste0(MRwin, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
-	mutate(guess = paste0("Guessing, c = ", guess)) %>%
-	mutate(n_students = paste0("Persons, I = ", n_students) %>% factor(levels = c("Persons, I = 10000", "Persons, I = 5000", "Persons, I = 1000"))) %>% 
+	mutate(guess = paste0("c = ", guess)) %>%
+	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
 	geom_point(aes(color = `Winning model`), alpha = 0.5) +
@@ -27,14 +27,14 @@ mrgraph <-
 		y = latex2exp::TeX("$\\mu_{a}$ (log median item discrimination)")
 	) +
 	scale_color_discrete(drop = FALSE) +
-	theme_bw(base_size = 6) +
+	theme_bw(base_size = 10) +
 	theme(legend.position = "none")
 
 mpgraph <- 
 	thr %>%
 	mutate(`Winning model` = paste0(MPwin, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
-	mutate(guess = paste0("Guessing, c = ", guess)) %>%
-	mutate(n_students = paste0("Persons, I = ", n_students) %>% factor(levels = c("Persons, I = 10000", "Persons, I = 5000", "Persons, I = 1000"))) %>% 
+	mutate(guess = paste0("c = ", guess)) %>%
+	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
 	geom_point(aes(color = `Winning model`), alpha = 0.5) +
@@ -45,13 +45,13 @@ mpgraph <-
 		y = NULL
 	) +
 	scale_color_discrete(drop = FALSE) +
-	theme_bw(base_size = 6) +
+	theme_bw(base_size = 10) +
 	theme(legend.position = "right")
 
 mrgraph + mpgraph
 ```
 
-```{r results5b2, fig.cap = 'Simulation Study 3 results for the model selection methods, BIC, AIC, and LRT. Each point corresponds to the selected model from one of 1000 replications. The 3PL model was selected more often with greater item discrimination, more difficult items, and more persons. BIC selected models consistent with ELPL-MR, while AIC and LRT selected models more consistent with ELPL-MP.', fig.width = 7, fig.height = 3}
+```{r results5b2, fig.cap = 'Simulation study 3 results for the model selection methods, BIC, AIC, and LRT. Each point corresponds to the selected model from one of 1000 replications. The 3PL model was selected more often with greater item discrimination, more difficult items, and more persons. BIC selected models consistent with ELPL-MR, while AIC and LRT selected models more consistent with ELPL-MP.', fig.width = 7, fig.height = 3}
 
 lrselect <- function(x){
 	if(x[2] > 0.05){
@@ -72,7 +72,7 @@ lr <-
 		lr = out %>% map_dbl(~ lrselect(.$p_from_lr))
 	) %>% 
 	mutate(guess = paste0("c = ", guess)) %>%
-	mutate(n_students = paste0("Persons, I = ", n_students) %>% factor(levels = c("Persons, I = 10000", "Persons, I = 5000", "Persons, I = 1000"))) %>% 
+	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
 	mutate(`Winning model` = paste0(lr, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
@@ -83,7 +83,7 @@ lr <-
 		x = latex2exp::TeX("$\\mu_{b}$ (mean item easiness)"),
 		y = NULL
 	) +
-	theme_bw(base_size = 6)
+	theme_bw(base_size = 7)
 
 aic <- 
 	thr %>% 
@@ -95,7 +95,7 @@ aic <-
 		lr = out %>% map_dbl(~ lrselect(.$p_from_lr))
 	) %>% 
 	mutate(guess = paste0("c = ", guess)) %>%
-	mutate(n_students = paste0("Persons, I = ", n_students) %>% factor(levels = c("Persons, I = 10000", "Persons, I = 5000", "Persons, I = 1000"))) %>% 
+	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
 	mutate(`Winning model` = paste0(aic, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
@@ -106,7 +106,7 @@ aic <-
 		x = latex2exp::TeX("$\\mu_{b}$ (mean item easiness)"),
 		y = NULL
 	) + 
-	theme_bw(base_size = 6) +
+	theme_bw(base_size = 7) +
 	theme(legend.position = "none")
 
 bic <- 
@@ -119,7 +119,7 @@ bic <-
 		lr = out %>% map_dbl(~ lrselect(.$p_from_lr))
 	) %>% 
 	mutate(guess = paste0("c = ", guess)) %>%
-	mutate(n_students = paste0("Persons, I = ", n_students) %>% factor(levels = c("Persons, I = 10000", "Persons, I = 5000", "Persons, I = 1000"))) %>% 
+	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
 	mutate(`Winning model` = paste0(bic, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
@@ -130,7 +130,7 @@ bic <-
 		x = latex2exp::TeX("$\\mu_{b}$ (mean item easiness)"),
 		y = latex2exp::TeX("$\\mu_{a}$ (log median item discrimination)")
 	) +
-	theme_bw(base_size = 6) +
+	theme_bw(base_size = 7) +
 	theme(legend.position = "none")
 
 bic + aic + lr

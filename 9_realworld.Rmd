@@ -1,5 +1,5 @@
 
-In the simulation studies, we could calculate ELPL-MR and ELPL-MP because the DGM was known. In practice, when the DGM is not known, the predictive performance metrics can be estimated by hiding part of the data from the model so as to serve as out-of-sample data. This is known as cross-validation and it needs to be implemented based on which prediction task (and metric) is of interest [@bates2021cross]. For example, @bolt2003estimation implemented a cross-validation technique that corresponds to the missing person prediction task. @bergner2012model and @wu2020variational cross-validated item response models in a way that corresponds to the missing responses task. We now describe how to use cross-validation to estimate each predictive fit metrics in practice. We then provide a real data example of using cross-validation.
+In the simulation studies, we could calculate ELPL-MR and ELPL-MP because the DGM was known. In practice, when the DGM is not known, the predictive performance metrics can be estimated by hiding part of the data from the model so as to serve as out-of-sample data. This is known as cross-validation and it needs to be implemented based on which prediction task (and metric) is of interest [@bates2021cross]. For example, @bolt2003estimation implemented a cross-validation technique that corresponds to the missing person prediction task. @bergner2012model and @wu2020variational cross-validated item response models in a way that corresponds to the missing responses task. We now describe how to use cross-validation to estimate each predictive fit metric in practice. We then provide a real data example of using cross-validation.
 
 ## Cross-validated Log Likelihood for Missing Responses (CVLL-MR)
 
@@ -25,11 +25,11 @@ We then aggregate across folds to get the cross-validated log likelihood for mis
 
 ## Real Data Example
 
-The Programme for International Student Assessment (PISA) is conducted every three years and aims to measure "the extent to which 15-year-old students, near the end of the compulsory education, have acquired key knowledge and skills" [@pisa2015pisa] In 2015, PISA switched from using a Rasch model to a 2PL model based on research showing that the 2PL model had lower AIC and BIC [@oliveri2011investigation]. To demonstrate model selection in practice, we compared a variety of models fit to a subset of the 2015 PISA data. In particular, we focused on the first 17 questions^[These questions have high response rates presumably because students don't run out of time] from science booklet 25. We considered the 9800 students (regardless of country) who responded to all 17 questions. As a result, \(Y\) contained no missingness and \(9800 \cdot 17 = 166,600\) item responses. So that all items were dichotomously coded, we considered partial credit to be correct.
+The Programme for International Student Assessment (PISA) is conducted every three years and aims to measure "the extent to which 15-year-old students, near the end of the compulsory education, have acquired key knowledge and skills" [@pisa2015pisa]. In 2015, PISA switched from using a Rasch model to a 2PL model based on research showing that the 2PL model had lower AIC and BIC [@oliveri2011investigation]. To demonstrate model selection in practice, we compared a variety of models fit to a subset of the 2015 PISA data. In particular, we focused on the first 17 questions (because they have high response rates) from science booklet 25. We considered the 9800 students (regardless of country) who responded to all 17 questions. As a result, \(Y\) contained no missingness and \(9800 \cdot 17 = 166,600\) item responses. So that all items were dichotomously coded, we considered partial credit to be correct.
 
 We compared seven models fit to this data: Rasch, 1F 2PL, 1F 3PL, 2F 2PL, 2F 3PL, 3F 2PL, and 3F 3PL. We evaluated each of these models using CVLL-MR, CVLL-MP, BIC, AIC, and LRT. For the LRT, we compared each pair of models ordered by number of parameters. We also evaluated each model using cross-validated accuracy for missing responses (CVACC-MR), which is similar to CVLL-MR but accuracy (at a 0.5 cutoff) as opposed to log likelihood is aggregated across folds. As shown in Table \ref{tab:results1}, the selected model varied by metric. Consistent with results from our simulation studies, metrics based on the MR prediction task selected models with fewer parameters than metrics based on the MP prediction task. In particular, CVLL-MR and CVACC-MR both selected the 1F 3PL. The other four metrics, which are all based on marginalized likelihood, selected either the 2F 3PL or 3F 3PL models.
 
-This case study demonstrates that the selected model varies significantly by metric. The cross-validation metrics involve fewer assumptions, which might be good reason to prefer them to the other metrics. Even so, which cross-validation metric should be used? If the goal is to predict probabilities of item responses—for example, in developing a computer adaptive version of the PISA—then the 1F 3PL model as selected by CVLL-MR might be used. On the other hand, if the goal is draw conclusions with regard to the population of persons, then a model with more parameters such as the 3F 3PL model as selected by CVLL-MP may be preferred.
+This case study demonstrates that the selected model varies significantly by metric. The cross-validation metrics involve fewer assumptions, which might be good reason to prefer them to the other metrics. Even so, which cross-validation metric should be used? If the goal is to predict probabilities of item responses—for example, in developing a computer adaptive version of the PISA—then the 1F 3PL model as selected by CVLL-MR and CVACC-MR^[A benefit of missing responses is that the results are easier to interpret. For CVACC-MR, the accuracy of each model are all within 0.4% which may or may not be a small difference depending on the context. For CVLL-MR, the geometric mean of the likelihood can be reasoned about as the typical likelihood of an individual item response: For the 1F 3PL model the geometric mean is $\exp\left(\frac{-84828}{166600}\right) = 0.601$ as opposed to $\exp\left(\frac{-86130}{166600}\right) = 0.596$ for the 1F Rasch model.] might be used. On the other hand, if the goal is draw conclusions with regard to the item parameters, then a model with more parameters such as the 3F 3PL model as selected by CVLL-MP may be preferred. This example illustrates that there is no single best-fitting model—instead, results depend on a number of other factors including how prediction is defined.
 
 ```{r}
 ##### GET VALUES FOR TABLE BELOW #####
@@ -44,8 +44,10 @@ This case study demonstrates that the selected model varies significantly by met
 # 	mutate_all(as.character)
 ```
 
+\setlength{\tabcolsep}{2pt}
+\begin{table}
+\caption{Fit of seven models to a subset of the 2015 PISA data according to six metrics. Models are ordered by number of parameters. Consistent with results from the simulation studies, metrics based on the missing responses prediction task prefer models with fewer parameters (i.e., less flexible). LRT is the p-value for the model compared to the model in the previous row, which is why the first value is NA. Each of these comparisons yielded a p-value <10\textasciicircum{}-10, thus the most flexible model was selected. * indicates the winning model according to the metric.}
 \centering
-\fontsize{6}{8}\selectfont
 \begin{small}
 \begin{tabular}[t]{llllllll}
 \toprule
@@ -60,6 +62,6 @@ Model & Parameters & CVLL-MR & CVACC-MR & CVLL-MP & BIC & AIC & LRT\\
 3F 3PL & 82 & -86049 & 0.74736     & *-88653* & 177888  & *177298* & *<10\textasciicircum{}-10*\\
 \bottomrule
 \end{tabular}
-\label{tab:inpractice}
 \end{small}
+\label{tab:inpractice}
 \end{table}

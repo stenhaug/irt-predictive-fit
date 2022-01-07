@@ -107,8 +107,6 @@ make_fulldata <- function(data){
 	colnames(right) <- glue::glue("Item.{1:ncol(data)}_2")
 	out <- cbind(wrong, right)[, order(c(seq(ncol(wrong)), seq(ncol(right))))]
 
-	# I don't totally get this but I think we just make NA = 0
-	# So that they are disregarded from the likelihood calculation
 	out[is.na(out)] <- 0
 	out
 }

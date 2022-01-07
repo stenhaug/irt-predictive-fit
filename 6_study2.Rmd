@@ -45,33 +45,4 @@ read_rds("sims/sim2.rds") %>%
 		x = latex2exp::TeX("$\\mu_{\\theta}$ (mean ability)"),
 		y = latex2exp::TeX("$I$ (number of persons)")
 	)
-
-# new but seems worse so i am going back
-# read_rds("sims/sim2.rds") %>%
-# 	filter(true_model == "3PL") %>%
-# 	select(-n_items, -true_model, -MRwin, -MPwin) %>%
-# 	mutate(
-# 		`ELPL-MR` = out %>% map_dbl(~ which.max(.$elplMR)),
-# 		`ELPL-MP` = out %>% map_dbl(~ which.max(.$elplMP)),
-# 		AIC = out %>% map_dbl(~ which.min(.$AIC)),
-# 		BIC = out %>% map_dbl(~ which.min(.$BIC)),
-# 		LRT = out %>% map_dbl(~ lrselect(.$p_from_lr))
-# 	) %>% 
-# 	select(-out) %>% 
-# 	gather(var, val, -n_students, -theta_mu) %>% 
-# 	mutate(var = factor(var, levels = c("ELPL-MR", "ELPL-MP", "BIC", "AIC", "LRT"))) %>% 
-# 	mutate(`Winning model` = paste0(val, "PL")) %>%
-# 	filter(`Winning model` != "1PL") %>% 
-# 	rename(`N persons` = n_students, `Mean ability` = theta_mu) %>% 
-# 	filter(var %in% c("ELPL-MR", "ELPL-MP")) %>% 
-# 	mutate(x = case_when(var == "ELPL-MR" ~ "Missing Responses", var == "ELPL-MP" ~ "Missing Persons")) %>% 
-# 	ggplot(aes(x = `Mean ability`, y = `N persons`, color = `Winning model`)) +
-# 	geom_point(alpha = 0.5, size = 2.25) +
-# 	facet_wrap(~ x, nrow = 1) +
-# 	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
-# 	labs(
-# 		x = latex2exp::TeX("Test Easiness"),
-# 		y = latex2exp::TeX("People")
-# 	) + 
-# 	theme(legend.position="bottom")
 ```

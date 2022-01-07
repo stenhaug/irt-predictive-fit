@@ -28,19 +28,6 @@ run_MD_withcv <- function(dim, nitems, p, n_students, ncyc){
 	mod2f <- mirt(sim$data, 2, "2PL", technical = list(NCYCLES = ncyc))
 	mod2f@Options$exploratory <- FALSE
 
-	# pars2fP <- mirt(sim$data, 2, "2PL", pars = "values")
-	# pars2fP[91 , 6] <- 0
-	# pars2fP[91 , 9] <- FALSE
-	# pars2fP[dim(pars2fP)[1] - 1 , 9] <- TRUE
-	# mod2fP <- mirt(sim$data, 2, pars = pars2fP, technical = list(NCYCLES = ncyc))
-
-	# model_truth <-
-	# 	mirt(
-	# 		sim$data,
-	# 		ncol(pars) - 3,
-	# 		pars = as.data.frame(make_model_df(pars, p))
-	# 	)
-
 	# intermediate steps for elplMR -------------------------------------------
 	p_true <-
 		1:nitems %>%
@@ -49,8 +36,6 @@ run_MD_withcv <- function(dim, nitems, p, n_students, ncyc){
 
 	f1 <- fscores(mod1f, method = "EAP", rotate = "none", QMC = FALSE)
 	f2 <- fscores(mod2f, method = "EAP", rotate = "none", QMC = FALSE)
-	# f2P <- fscores(mod2fP, method = "EAP", rotate = "none", QMC = FALSE)
-	# ftrue <- fscores(model_truth, method = "EAP", rotate = "none", QMC = FALSE)
 
 	# CV ----------------------------------------------------------------------
 	wide <- sim$data

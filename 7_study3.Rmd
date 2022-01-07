@@ -10,41 +10,46 @@ As anticipated, the guessing parameter played a prominent role: The 3PL model us
 
 ```{r results5b1, fig.cap = 'Simulation study 3 results for the predictive fit metrics, ELPL-MR and ELPL-MP. Each point corresponds to the prediction-maximizing model from one of 1000 replications. The 3PL model was most likely to offer the best fit with greater item discrimination, more difficult items, and more persons. ELPL-MP preferred the 3PL model more often than ELPL-MR did.', fig.width = 7, fig.height = 3}
 
-thr <- read_rds("sims/sim3.rds")
+thr <- read_rds("sims/sim3.rds") %>% sample_frac(1)
 
 mrgraph <- 
 	thr %>%
 	mutate(`Winning model` = paste0(MRwin, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
 	mutate(guess = paste0("c = ", guess)) %>%
 	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
+	mutate(`Winning model` = ifelse(`Winning model` == "3PL", "3PL", "1PL or 2PL")) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
-	geom_point(aes(color = `Winning model`), alpha = 0.5) +
+	geom_point(aes(color = `Winning model`), alpha = 1) +
+	scale_color_manual(values = c("gray", "black")) +
 	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 	labs(
 		title = "ELPL-MR",
 		x = latex2exp::TeX("$\\mu_{b}$ (mean item easiness)"),
 		y = latex2exp::TeX("$\\mu_{a}$ (log median item discrimination)")
 	) +
-	scale_color_discrete(drop = FALSE) +
+	# scale_color_discrete(drop = FALSE) +
 	theme_bw(base_size = 10) +
 	theme(legend.position = "none")
 
 mpgraph <- 
 	thr %>%
+	sample_frac(1) %>% 
 	mutate(`Winning model` = paste0(MPwin, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
 	mutate(guess = paste0("c = ", guess)) %>%
 	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
+	mutate(`Winning model` = ifelse(`Winning model` == "3PL", "3PL", "1PL or 2PL")) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
-	geom_point(aes(color = `Winning model`), alpha = 0.5) +
+	geom_point(aes(color = `Winning model`), alpha = 1) +
+	scale_color_manual(values = c("gray", "black")) +
 	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 	labs(
 		title = "ELPL-MP",
 		x = latex2exp::TeX("$\\mu_{b}$ (mean item easiness)"),
 		y = NULL
 	) +
-	scale_color_discrete(drop = FALSE) +
+	# scale_color_discrete(drop = FALSE) +
 	theme_bw(base_size = 10) +
 	theme(legend.position = "right")
 
@@ -74,10 +79,12 @@ lr <-
 	mutate(guess = paste0("c = ", guess)) %>%
 	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
 	mutate(`Winning model` = paste0(lr, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
+	mutate(`Winning model` = ifelse(`Winning model` == "3PL", "3PL", "1PL or 2PL")) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
-	geom_point(aes(color = `Winning model`), alpha = 0.5) +
-	scale_color_discrete(drop = FALSE) +
+	geom_point(aes(color = `Winning model`), alpha = 1) +
+	scale_color_manual(values = c("gray", "black")) +
+	# scale_color_discrete(drop = FALSE) +
 	labs(
 		title = "LRT",
 		x = latex2exp::TeX("$\\mu_{b}$ (mean item easiness)"),
@@ -97,10 +104,12 @@ aic <-
 	mutate(guess = paste0("c = ", guess)) %>%
 	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
 	mutate(`Winning model` = paste0(aic, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
+	mutate(`Winning model` = ifelse(`Winning model` == "3PL", "3PL", "1PL or 2PL")) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
-	geom_point(aes(color = `Winning model`), alpha = 0.5) +
-	scale_color_discrete(drop = FALSE) +
+	geom_point(aes(color = `Winning model`), alpha = 1) +
+	scale_color_manual(values = c("gray", "black")) +
+	# scale_color_discrete(drop = FALSE) +
 	labs(
 		title = "AIC",
 		x = latex2exp::TeX("$\\mu_{b}$ (mean item easiness)"),
@@ -121,10 +130,12 @@ bic <-
 	mutate(guess = paste0("c = ", guess)) %>%
 	mutate(n_students = paste0("I = ", n_students) %>% factor(levels = c("I = 10000", "I = 5000", "I = 1000"))) %>% 
 	mutate(`Winning model` = paste0(bic, "PL") %>% factor(levels = c("1PL", "2PL", "3PL"))) %>% 
+	mutate(`Winning model` = ifelse(`Winning model` == "3PL", "3PL", "1PL or 2PL")) %>% 
 	ggplot(aes(x = mean_easy, y = lnmean_disc)) +
 	facet_grid(n_students ~ guess) +
-	geom_point(aes(color = `Winning model`), alpha = 0.5) +
-	scale_color_discrete(drop = FALSE) +
+	geom_point(aes(color = `Winning model`), alpha = 1) +
+	scale_color_manual(values = c("gray", "black")) +
+	# scale_color_discrete(drop = FALSE) +
 	labs(
 		title = "BIC",
 		x = latex2exp::TeX("$\\mu_{b}$ (mean item easiness)"),

@@ -15,6 +15,7 @@ Figure \ref{fig:results6a} shows the winning model for each run according to ELP
 ```{r results6a, fig.cap = 'Simulation Study 4 results. Each point corresponds to the prediction-maximizing model according to the predictive fit metrics, ELPL-MR and ELPL-MP, or the model selected by BIC, AIC, or LRT for one of 2000 replications. The prediction-maximizing and selected model was more likely to be the 2F 2PL with lower correlation between factors and more persons. LRT nearly always selected the 2F 2PL model even in replications where both ELPL-MP and ELPL-MR identified the 1F 2PL model as prediction-maximizing. AIC selected models largely consistent with ELPL-MP. BIC selected models more closely aligned to ELPL-MR.', fig.width=7, fig.height=3}
 
 read_rds("sims/sim4.rds") %>%
+	sample_frac(1) %>% 
 	rename(v = p) %>%
 	unnest_wider(out) %>%
 	mutate(
@@ -27,8 +28,10 @@ read_rds("sims/sim4.rds") %>%
 	select(dim:n_students, `ELPL-MR`:LRT) %>%
 	gather(var, val, -(dim:n_students)) %>%
 	mutate(var = factor(var, levels = c("ELPL-MR", "ELPL-MP", "BIC", "AIC", "LRT"))) %>%
+	mutate(val = ifelse(val == "2F 2PL", "2F 2PL", "1F 2PL")) %>% 
 	ggplot(aes(x = v, y = n_students, color = val)) +
-	geom_point(alpha = 0.4) +
+	geom_point(alpha = 1) +
+	scale_color_manual(values = c("gray", "black")) +
 	facet_wrap(~ var, nrow = 1) +
 	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 	labs(

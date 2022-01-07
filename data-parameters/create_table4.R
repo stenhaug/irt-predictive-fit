@@ -1,7 +1,6 @@
 library(tidyverse)
 
 # this reproduces table 4 from irt model selection methods for dich items kang and cohen
-# note i dont know if these are item difficulties or easiness but i suspect difficulties because thats the term they use in the paper
 
 # raw data using datapasta
 a1 <- c(1.1005, NA, 2.2093, NA, 1.4493, NA, 0.7514, NA, 1.5789, NA, 0.6425, NA, 1.6254, NA, 1.3415, NA, 0.918, NA, 1.8027, NA, 0.8159, NA, 0.9375, NA, 0.9126, NA, 1.9395, NA, 0.3746, NA, 0.673, NA, 0.4166, NA, 1.2093, NA, 0.9486, NA, 1.4916)

@@ -42,16 +42,16 @@ header-includes:
 - \captionsetup[figure]{font={stretch=1}}
 
 floatsintext      : yes
-figurelist        : no
-tablelist         : no
-footnotelist      : no
+figurelist        : yes
+tablelist         : yes
+footnotelist      : yes
 linenumbers       : yes
 mask              : no
 draft             : no
 
 documentclass     : "apa7"
 classoption       : "man"
-output            : papaja::apa6_pdf
+output            : papaja::apa6_docx
 ---
 
 ```{r setup, include = FALSE}

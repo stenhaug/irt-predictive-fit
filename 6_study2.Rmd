@@ -20,7 +20,8 @@ lrselect <- function(x){
 }
 
 read_rds("sims/sim2.rds") %>%
-	filter(true_model == "3PL") %>%
+	sample_frac(1) %>% 
+	filter(true_model == "3PL") %>% # randomize so order doesn't affect plotting over each other
 	select(-n_items, -true_model, -MRwin, -MPwin) %>%
 	mutate(
 		`ELPL-MR` = out %>% map_dbl(~ which.max(.$elplMR)),
@@ -34,8 +35,10 @@ read_rds("sims/sim2.rds") %>%
 	mutate(var = factor(var, levels = c("ELPL-MR", "ELPL-MP", "BIC", "AIC", "LRT"))) %>% 
 	mutate(`Winning model` = paste0(val, "PL")) %>%
 	rename(`N persons` = n_students, `Mean ability` = theta_mu) %>% 
+	mutate(`Winning model` = ifelse(`Winning model` == "3PL", "3PL", "1PL or 2PL")) %>% 
 	ggplot(aes(x = `Mean ability`, y = `N persons`, color = `Winning model`)) +
-	geom_point(alpha = 0.5) +
+	geom_point(alpha = 1) +
+	scale_color_manual(values = c("gray", "black")) +
 	facet_wrap(~ var, nrow = 1) +
 	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + 
 	labs(
